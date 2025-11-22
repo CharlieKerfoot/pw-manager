@@ -1,5 +1,4 @@
 <script lang="ts">
-	import Icon from '@iconify/svelte';
 	import { Card, SelectModal, SettingsModal, Account, Login } from '$lib';
 	import { onMount } from 'svelte';
 
