@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+
+:root {
+	--color-bg: #050505;
+	--color-surface: #111111;
+	--color-text: #ffffff;
+	--color-accent: #ccff00;
+	--color-accent-hover: #b3e600;
+	--color-danger: #ff3300;
+	--color-border: #333333;
+	
+	--font-header: 'Unbounded', sans-serif;
+	--font-mono: 'Space Mono', monospace;
+	
+	--shadow-hard: 6px 6px 0px var(--color-accent);
+	--shadow-hard-sm: 3px 3px 0px var(--color-accent);
+}
+
+body {
+	background-color: var(--color-bg);
+	color: var(--color-text);
+	font-family: var(--font-mono);
+	margin: 0;
+	padding: 0;
+	overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-family: var(--font-header);
+	text-transform: uppercase;
+	font-weight: 900;
+	letter-spacing: -0.02em;
+}
+
+button {
+	font-family: var(--font-mono);
+	text-transform: uppercase;
+	font-weight: 700;
+	border-radius: 0 !important;
+	cursor: pointer;
+}
+
