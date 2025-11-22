@@ -8,6 +8,8 @@ A cyberpunk password vault built with SvelteKit and a Rust webserver backend.
 - Encrypted database
 - Glitchy, Cyberpunk aesthetic
 
+![demo photo](static/image.png)
+
 ## Usage
 
 1. Clone the repository
