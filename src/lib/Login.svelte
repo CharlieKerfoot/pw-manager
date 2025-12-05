@@ -13,7 +13,7 @@
 		const payload = { email, password_hash: password };
 
 		try {
-			const res = await fetch(`http://localhost:3000${endpoint}`, {
+			const res = await fetch(`${import.meta.env.VITE_API_URL}${endpoint}`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(payload)
@@ -21,7 +21,7 @@
 
 			if (res.ok) {
 				if (isRegistering) {
-					const loginRes = await fetch('http://localhost:3000/login', {
+					const loginRes = await fetch(`${import.meta.env.VITE_API_URL}/login`, {
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json' },
 						body: JSON.stringify(payload)

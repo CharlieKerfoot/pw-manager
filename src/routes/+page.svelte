@@ -16,7 +16,7 @@
 		}
 
 		try {
-			const res = await fetch('http://localhost:3000/accounts', {
+			const res = await fetch(`${import.meta.env.VITE_API_URL}/accounts`, {
 				headers: { 'Authorization': `Bearer ${token}` }
 			});
 			if (res.ok) {
@@ -51,13 +51,13 @@
 			};
 
 			if (account.id) {
-				await fetch(`http://localhost:3000/accounts/${account.id}`, {
+				await fetch(`${import.meta.env.VITE_API_URL}/accounts/${account.id}`, {
 					method: 'PUT',
 					headers,
 					body: JSON.stringify(account)
 				});
 			} else {
-				await fetch('http://localhost:3000/accounts', {
+				await fetch(`${import.meta.env.VITE_API_URL}/accounts`, {
 					method: 'POST',
 					headers,
 					body: JSON.stringify(account)
@@ -150,7 +150,7 @@
 					cards = cards.filter((c) => c.id !== card.id);
 
 					try {
-						await fetch(`http://localhost:3000/accounts/${card.id}`, {
+						await fetch(`${import.meta.env.VITE_API_URL}/accounts/${card.id}`, {
 							method: 'DELETE',
 							headers: { 'Authorization': `Bearer ${token}` }
 						});

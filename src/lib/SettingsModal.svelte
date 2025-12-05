@@ -4,7 +4,7 @@
 	let { showSettings = $bindable(), onClearData } = $props();
 
 	function handleExport() {
-		fetch('http://localhost:3000/accounts', {
+		fetch(`${import.meta.env.VITE_API_URL}/accounts`, {
 			headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
 		})
 			.then(res => res.json())
@@ -22,7 +22,7 @@
 	async function handleDeleteAll() {
 		if (confirm('WARNING: THIS WILL PERMANENTLY ERASE ALL DATA. CONFIRM?')) {
 			try {
-				await fetch('http://localhost:3000/accounts/all', {
+				await fetch(`${import.meta.env.VITE_API_URL}/accounts/all`, {
 					method: 'DELETE',
 					headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
 				});
