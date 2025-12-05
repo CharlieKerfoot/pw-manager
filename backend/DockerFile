@@ -1,0 +1,28 @@
+# 1. Prepare recipe
+FROM lukemathwalker/cargo-chef:latest-rust-1 AS chef
+WORKDIR /app
+
+FROM chef AS planner
+COPY . .
+RUN cargo chef prepare --recipe-path recipe.json
+
+# 2. Build dependencies (Cached!)
+FROM chef AS builder 
+COPY --from=planner /app/recipe.json recipe.json
+RUN cargo chef cook --release --recipe-path recipe.json
+
+# 3. Build Application
+COPY . .
+RUN cargo build --release --bin pw-manager-backend 
+
+# 4. Runtime Environment
+FROM debian:bookworm-slim AS runtime
+WORKDIR /app
+RUN apt-get update -y \
+    && apt-get install -y --no-install-recommends openssl ca-certificates \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /app/target/release/pw-manager-backend /usr/local/bin/app
+
+CMD ["/usr/local/bin/app"]
