@@ -10,8 +10,6 @@ https://pw-manager-ckerf.vercel.app
 - Encrypted database
 - Glitchy, Cyberpunk aesthetic
 
-![demo photo](static/image.png)
-
 ## Usage
 
 1. Clone the repository
