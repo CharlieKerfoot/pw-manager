@@ -1,23 +1,18 @@
+use crate::models::{Account, Claims, User};
+use argon2::{
+    password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
+    Argon2,
+};
 use axum::{
-    extract::{State, Json},
-    http::{StatusCode, HeaderMap},
+    extract::{Json, State},
+    http::{HeaderMap, StatusCode},
     response::IntoResponse,
 };
+use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use sqlx::SqlitePool;
-use crate::models::{Account, User, Claims};
-use argon2::{
-    password_hash::{
-        rand_core::OsRng,
-        PasswordHash, PasswordHasher, PasswordVerifier, SaltString
-    },
-    Argon2
-};
-use jsonwebtoken::{encode, decode, Header, Validation, EncodingKey, DecodingKey};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 const SECRET_KEY: &[u8] = b"super_secret_key_change_me"; // TODO: Move to env var
-
-// --- Auth Handlers ---
 
 pub async fn register(
     State(pool): State<SqlitePool>,
@@ -25,7 +20,10 @@ pub async fn register(
 ) -> impl IntoResponse {
     let salt = SaltString::generate(&mut OsRng);
     let argon2 = Argon2::default();
-    let password_hash = argon2.hash_password(payload.password_hash.as_bytes(), &salt).unwrap().to_string();
+    let password_hash = argon2
+        .hash_password(payload.password_hash.as_bytes(), &salt)
+        .unwrap()
+        .to_string();
 
     let result = sqlx::query("INSERT INTO users (email, password_hash) VALUES (?, ?)")
         .bind(&payload.email)
@@ -39,10 +37,7 @@ pub async fn register(
     }
 }
 
-pub async fn login(
-    State(pool): State<SqlitePool>,
-    Json(payload): Json<User>,
-) -> impl IntoResponse {
+pub async fn login(State(pool): State<SqlitePool>, Json(payload): Json<User>) -> impl IntoResponse {
     let user = sqlx::query_as::<_, User>("SELECT * FROM users WHERE email = ?")
         .bind(&payload.email)
         .fetch_optional(&pool)
@@ -51,33 +46,46 @@ pub async fn login(
 
     if let Some(user) = user {
         let parsed_hash = PasswordHash::new(&user.password_hash).unwrap();
-        if Argon2::default().verify_password(payload.password_hash.as_bytes(), &parsed_hash).is_ok() {
+        if Argon2::default()
+            .verify_password(payload.password_hash.as_bytes(), &parsed_hash)
+            .is_ok()
+        {
             let expiration = SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .unwrap()
-                .as_secs() as usize + 3600 * 24; // 24 hours
+                .as_secs() as usize
+                + 3600 * 24; // 24 hours
 
             let claims = Claims {
                 sub: user.id.unwrap().to_string(),
                 exp: expiration,
             };
 
-            let token = encode(&Header::default(), &claims, &EncodingKey::from_secret(SECRET_KEY)).unwrap();
+            let token = encode(
+                &Header::default(),
+                &claims,
+                &EncodingKey::from_secret(SECRET_KEY),
+            )
+            .unwrap();
             return (StatusCode::OK, Json(serde_json::json!({ "token": token })));
         }
     }
 
-    (StatusCode::UNAUTHORIZED, Json(serde_json::json!({ "error": "Invalid credentials" })))
+    (
+        StatusCode::UNAUTHORIZED,
+        Json(serde_json::json!({ "error": "Invalid credentials" })),
+    )
 }
 
-// --- Helper to extract user_id from token ---
 fn get_user_id(headers: HeaderMap) -> Option<i64> {
     if let Some(auth_header) = headers.get("Authorization") {
         if let Ok(auth_str) = auth_header.to_str() {
             if auth_str.starts_with("Bearer ") {
                 let token = &auth_str[7..];
                 let validation = Validation::default();
-                if let Ok(token_data) = decode::<Claims>(token, &DecodingKey::from_secret(SECRET_KEY), &validation) {
+                if let Ok(token_data) =
+                    decode::<Claims>(token, &DecodingKey::from_secret(SECRET_KEY), &validation)
+                {
                     return token_data.claims.sub.parse::<i64>().ok();
                 }
             }
@@ -86,12 +94,7 @@ fn get_user_id(headers: HeaderMap) -> Option<i64> {
     None
 }
 
-// --- Account Handlers ---
-
-pub async fn get_accounts(
-    State(pool): State<SqlitePool>,
-    headers: HeaderMap,
-) -> impl IntoResponse {
+pub async fn get_accounts(State(pool): State<SqlitePool>, headers: HeaderMap) -> impl IntoResponse {
     let user_id = match get_user_id(headers) {
         Some(id) => id,
         None => return (StatusCode::UNAUTHORIZED, Json::<Vec<Account>>(vec![])).into_response(),

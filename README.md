@@ -2,6 +2,8 @@
 
 A cyberpunk password vault built with SvelteKit and a Rust webserver backend. Deployed using Vercel and Railway.
 
+https://pw-manager-ckerf.vercel.app
+
 ## Features
 
 - Secure password storage
